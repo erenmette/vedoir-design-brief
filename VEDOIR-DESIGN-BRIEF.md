@@ -2103,14 +2103,162 @@ Elke sectie volgt: **dramatische headline → product beeld → beschrijving →
 | `apple-iphone17pro-03-cameras.png` | Camera deep dive, exploded lens view |
 | `apple-iphone17pro-04-performance.png` | "New dimensions in power" headline |
 
+### Porsche Configurator
+| Bestand | Inhoud |
+|---------|--------|
+| `porsche-configurator-01-modelstart.png` | Modelselectie entry point |
+| `porsche-models-01.png` | Model cards grid |
+| `porsche-configurator-911-loading.png` | 3D loading state |
+| `porsche-configurator-911gt3-01.png` | Configurator met 3D auto in showroom |
+| `porsche-configurator-911gt3-02-clean.png` | Clean 3D view zonder dialogs |
+| `porsche-configurator-911gt3-03-colors.png` | Kleur-selectie met swatches |
+| `porsche-configurator-911gt3-04-interior.png` | Interieur view met stoelkeuze cards |
+| `porsche-configurator-911gt3-05-options.png` | Opties met accordion categorieën |
+
 ### Overige Inspiratie
 | Bestand | Inhoud |
 |---------|--------|
-| `porsche-configurator-01-modelstart.png` | Porsche modelselectie (configurator entry) |
-| `porsche-models-01.png` | Porsche model cards grid |
 | `undone-homepage-01.png` | UNDONE watch customizer homepage |
 | `undone-watches-collection.png` | UNDONE watch collectie grid |
 
 ---
 
-*Dit document (2100+ regels) bevat alle informatie die nodig is om het volledige Vedoir platform te ontwerpen en te bouwen. 34 referentie screenshots zijn beschikbaar in de `./screenshots/` map.*
+## 19. APPENDIX D: PORSCHE CONFIGURATOR & NORQAIN — UX PATRONEN
+
+### 19.1 Porsche 911 GT3 Configurator
+
+**URL**: porsche.com/configurator
+
+**Layout**: Verticale scroll configurator met sticky 3D preview
+
+```
+┌────────────────────────────────────────────────────┐
+│  [← Terug]   PORSCHE 911 GT3    [Opslaan] [Delen] │
+│ ───────────────────────────────────────────────────│
+│                                                    │
+│         ┌──────────────────────────────┐           │
+│         │                              │           │
+│         │    3D AUTO RENDER            │           │
+│         │    (sticky, draggable,       │           │
+│         │     realtime updates)        │           │
+│         │                              │           │
+│         └──────────────────────────────┘           │
+│                                                    │
+│  ┌─ EXTERIEUR ──────────────────────── ▼ ─────┐   │
+│  │  Kleur: [swatch] [swatch] [swatch]          │   │
+│  │  Velgen: [card]  [card]  [card]             │   │
+│  └─────────────────────────────────────────────┘   │
+│  ┌─ INTERIEUR ──────────────────────── ▼ ─────┐   │
+│  │  Stoelen: [card met afbeelding]             │   │
+│  │  Dashboard: [card met afbeelding]           │   │
+│  └─────────────────────────────────────────────┘   │
+│  ┌─ OPTIES ─────────────────────────── ▼ ─────┐   │
+│  │  Checkboxes voor individuele opties         │   │
+│  └─────────────────────────────────────────────┘   │
+│                                                    │
+│ ══════════════════════════════════════════════════ │
+│  STICKY BOTTOM BAR:                                │
+│  $239,850  |  $3,248/mo  |  [VOLGENDE STAP →]     │
+│ ══════════════════════════════════════════════════ │
+└────────────────────────────────────────────────────┘
+```
+
+**Key UX patterns**:
+- **Accordion categorieën**: Exterieur, Interieur, Opties. Eén open tegelijk
+- **Sticky 3D preview**: Auto blijft altijd zichtbaar bovenaan terwijl je opties scrollt
+- **Sticky bottom bar**: Prijs + maandelijks bedrag + CTA altijd zichtbaar
+- **Kleur swatches**: Kleine cirkels met werkelijke kleuren, geselecteerd = ring eromheen
+- **Product image cards**: Opties als cards met foto + naam + prijs, radio button selectie
+- **Frosted glass**: `backdrop-filter: blur(32px)` op overlays
+- **Font**: Porsche Next (custom), fluid sizing met `clamp()`
+
+**Vedoir toepassing**: De sticky bottom bar met live prijs is ideaal als wrapper element ONDER de Kickflip iframe. Toont de totaalprijs die mee-update via postMessage events.
+
+### 19.2 NORQAIN Watch Configurator
+
+**Concept**: 11-stappen lineaire workflow voor 5.4 miljoen mogelijke combinaties
+
+**Layout**: Split-screen — 40% controls links, 60% preview rechts
+
+```
+┌────────────────────┬───────────────────────────────┐
+│                    │                               │
+│  STAP 3: HANDS     │                               │
+│                    │      [HORLOGE RENDER           │
+│  ┌──────────────┐  │       real-time update]        │
+│  │ [thumb] [thumb]│ │                               │
+│  │ [thumb] [thumb]│ │                               │
+│  └──────────────┘  │                               │
+│                    │                               │
+│  [← Vorige]       │                               │
+│  [Volgende →]      │                               │
+│                    │                               │
+├────────────────────┴───────────────────────────────┤
+│ ■■■■■□□□□□□  Stap 3/11  MOVEMENT > CASE > HANDS   │
+└────────────────────────────────────────────────────┘
+```
+
+**Key UX patterns**:
+- **Lineaire stappen**: Movement → Case → Hands → Dial → etc. (11 stappen)
+- **Thumbnail carousel**: Opties als kleine afbeelding-thumbnails in een scrollbaar grid
+- **Horizontale stappen-balk**: Onderaan, scrollbaar, toont alle 11 stappen met namen
+- **"Wild ONE of 1" branding**: Personalisatie als premium positionering
+- **Vaste split-screen**: Links panel scrollt NIET, rechts preview ook niet. Alleen de opties binnen het panel wisselen
+
+**Vedoir toepassing**: Dit is precies het patroon dat Kickflip's "Barebones" theme biedt — elke vraag op een apart scherm, lineaire navigatie. De horizontale stappen-balk kan als custom UI element boven de Kickflip iframe worden toegevoegd.
+
+### 19.3 Configurator Patroon Vergelijking
+
+| Aspect | Porsche (Scroll) | NORQAIN (Steps) | Vedoir (Kickflip) |
+|--------|-------------------|-----------------|-------------------|
+| Layout | Verticaal scrollen | Fixed split-screen | Kickflip iframe (Barebones = steps) |
+| Preview | Sticky bovenaan | Vast rechts 60% | Kickflip's live preview (links) |
+| Navigatie | Accordions | Lineaire stappen | Kickflip's step-by-step |
+| Prijs | Sticky bottom bar | In-panel | Kickflip dynamic pricing + custom bottom bar |
+| Opties UI | Cards + swatches | Thumbnails | Kickflip thumbnails + dropdowns |
+| Beste voor | Veel gelijktijdige categorieën | Sequentiële keuzes | Sequentiële keuzes (horloge) |
+
+**Conclusie**: NORQAIN's step-by-step patroon past het beste bij horloge customization en is precies wat Kickflip's Barebones theme biedt.
+
+---
+
+## 20. APPENDIX E: DE 7 PIJLERS VAN DIGITALE LUXE
+
+Geëxtraheerd uit analyse van Audemars Piguet, Apple, Porsche, Richard Mille en NORQAIN.
+
+### 1. TERUGHOUDENDHEID
+Minder UI, meer product. Elke pixel die geen product toont, moet witruimte zijn. Geen onnodige decoratie, geen overdreven animaties, geen drukke layouts.
+
+### 2. DUISTERNIS
+Donkere achtergronden laten producten gloeien. 80-90% van premium product pagina's is puur zwart. Lichte secties zijn uitzondering, niet de regel.
+
+### 3. WITRUIMTE
+Spacing tussen 24px en 256px. Content mag NOOIT druk voelen. Generous margins op elk element. Minstens 40% van elk scherm is lege ruimte.
+
+### 4. LANGZAME BEWEGING
+Alle transities: `0.3s - 0.5s ease-out`. Nooit sneller. Luxe heeft geen haast. Animaties moeten voelen als het tikken van een precisie-uurwerk, niet als een game.
+
+### 5. MATERIALITEIT
+Echte texturen, niet platte kleuren. Film grain overlays, subtiele reflecties, macro-fotografie die textuur toont. De website moet je het gevoel geven dat je het materiaal kunt voelen.
+
+### 6. PRECISIE
+Specificaties als statusymbolen presenteren. "39 mm" op 40px in ultra-thin weight. "904L STAAL" als emotioneel moment, niet als tabelrij. Cijfers zijn design-elementen.
+
+### 7. EXCLUSIVITEITSTAAL
+"Plan een Afspraak", niet "Koop Nu". "Het Atelier", niet "Configurator". "Meesterwerk", niet "Custom Horloge". "Verhalenvertellers", niet "Klanten". De taal positioneert het merk.
+
+**Vedoir mapping**:
+
+| Pijler | Vedoir Implementatie |
+|--------|---------------------|
+| Terughoudendheid | Max 1 CTA per sectie, geen floating bars |
+| Duisternis | `#0A0A0A` achtergrond dominant, 90% dark |
+| Witruimte | `clamp(4rem, 10vh, 12rem)` section spacing |
+| Langzame Beweging | `0.3s ease-in-out` universele timing |
+| Materialiteit | Film grain overlay, macro-fotografie, 904L textuur |
+| Precisie | "904L" en "50M" als 64px emotionele stats |
+| Exclusiviteitstaal | "Het Atelier", "Meesterwerk", "Verhalenvertellers" |
+
+---
+
+*Dit document (2200+ regels) bevat alle informatie die nodig is om het volledige Vedoir platform te ontwerpen en te bouwen. 40 referentie screenshots zijn beschikbaar in de `./screenshots/` map.*
